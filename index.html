@@ -1,83 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Laya</title>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <style>
 body{
-  margin:0;font-family:Segoe UI,sans-serif;
+  margin:0;
+  font-family:Segoe UI,sans-serif;
   background:radial-gradient(circle at top,#b30000,#2b0000);
-  color:#fff;overflow:hidden;
+  color:#fff;
+  overflow:hidden;
 }
-.screen{display:none;height:100vh;align-items:center;justify-content:center}
+
+.screen{display:none;height:100vh}
 .screen.active{display:flex}
 
-/* Login */
-.login-box{width:340px;text-align:center}
-.logo{font-size:42px;margin-bottom:25px}
-.fake{opacity:.6}
-.btn{
-  width:100%;padding:15px;border:none;border-radius:30px;
-  background:linear-gradient(90deg,#ff9a00,#ff4500);
-  color:#fff;font-size:18px;cursor:pointer;
+#login{
+  align-items:center;
+  justify-content:center;
 }
 
-/* Layout */
-.layout{display:flex;width:100%;height:100%}
-.player{flex:1;padding:16px;text-align:center}
-.playlist{width:260px;background:rgba(0,0,0,.45);overflow-y:auto}
+.login-box{
+  width:320px;
+  text-align:center;
+}
 
-/* Cover */
+.logo{
+  font-size:42px;
+  margin-bottom:25px;
+}
+
+.btn{
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:30px;
+  background:linear-gradient(90deg,#ff9a00,#ff4500);
+  color:white;
+  font-size:18px;
+  cursor:pointer;
+}
+
+.layout{
+  display:flex;
+  width:100%;
+  height:100%;
+}
+
+.player{
+  flex:1;
+  padding:16px;
+  text-align:center;
+}
+
+.playlist{
+  width:260px;
+  background:rgba(0,0,0,.45);
+  overflow-y:auto;
+}
+
 .cover{
-  width:220px;height:220px;margin:auto;border-radius:22px;
+  width:220px;
+  height:220px;
+  margin:auto;
+  border-radius:22px;
   background:radial-gradient(circle,orange,darkred);
   box-shadow:0 0 30px orange;
-  background-size:cover;background-position:center;
+  background-size:cover;
+  background-position:center;
 }
 
-/* Controls */
 .controls button{
-  background:none;border:none;color:orange;
-  font-size:26px;margin:8px;cursor:pointer
+  background:none;
+  border:none;
+  color:orange;
+  font-size:26px;
+  margin:8px;
+  cursor:pointer;
 }
-#seek{width:90%}
 
-/* Playlist */
-.song{padding:10px;cursor:pointer}
-.song.active{background:linear-gradient(90deg,orange,red)}
+#seek{
+  width:90%;
+}
 
-/* Search */
-.search{width:90%;padding:8px;margin:8px;border-radius:20px;border:none}
+.search{
+  width:90%;
+  padding:8px;
+  margin:8px;
+  border-radius:20px;
+  border:none;
+}
 
-/* Lyrics */
+.song{
+  padding:10px;
+  cursor:pointer;
+}
+
+.song.active{
+  background:linear-gradient(90deg,orange,red);
+}
+
 .lyrics-box{
-  height:200px;margin-top:12px;overflow-y:auto;
-  background:rgba(0,0,0,.4);border-radius:12px;
-  padding:10px;text-align:center;
-}
-.lyric-line{opacity:.35;padding:5px}
-.lyric-line.active{
-  opacity:1;color:orange;font-weight:bold;font-size:18px;
+  height:220px;
+  margin-top:12px;
+  overflow-y:auto;
+  background:rgba(0,0,0,.45);
+  border-radius:12px;
+  padding:10px;
 }
 
-/* Mini player */
-.mini{
-  position:fixed;bottom:0;left:0;right:0;height:60px;
-  background:#111;display:none;align-items:center;
-  justify-content:space-between;padding:0 15px;
+.lyric-line{
+  opacity:.35;
+  padding:6px 8px;
+  text-align:center;
+  transition:all .3s ease;
 }
-.mini button{background:none;border:none;color:orange;font-size:22px}
+
+.lyric-line.active{
+  opacity:1;
+  color:#ffcc66;
+  font-weight:bold;
+  font-size:20px;
+  background:linear-gradient(
+    90deg,
+    rgba(255,153,0,.15),
+    rgba(255,69,0,.35),
+    rgba(255,153,0,.15)
+  );
+  border-radius:10px;
+  box-shadow:0 0 12px rgba(255,120,0,.6);
+}
+
+.mini{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  height:60px;
+  background:#111;
+  display:none;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 15px;
+}
+
+.mini button{
+  background:none;
+  border:none;
+  color:orange;
+  font-size:22px;
+}
 
 /* MOBILE FIX */
 @media(max-width:768px){
   .layout{flex-direction:column}
-  .playlist{width:100%;height:160px;order:3}
-  .player{order:1}
-  .lyrics-box{height:240px}
+  .playlist{width:100%;height:160px}
+  .lyrics-box{height:260px}
 }
 </style>
 </head>
@@ -88,7 +170,7 @@ body{
 <div id="login" class="screen active">
   <div class="login-box">
     <div class="logo">🔥 Laya</div>
-    <p class="fake">Email / Password<br>(Future update)</p><br>
+    <p>Email & Password<br>(Future Update)</p><br>
     <button class="btn" onclick="login()">Login with Google</button>
   </div>
 </div>
@@ -128,17 +210,17 @@ body{
 </div>
 
 <script>
-/* ================= CONFIG ================= */
+/* CONFIG */
 const CLIENT_ID = "356912146612-r09rmnims2tb3vi0gd7sietp33dnjnuj.apps.googleusercontent.com";
 const FOLDER_ID = "1mv4L8IDoDEWnWqE7jaAatoAR9y4BsePR";
 
-/* ================= STATE ================= */
+/* STATE */
 let tokenClient, token;
-let allFiles=[], songs=[], queue=[];
-let index=0, lyrics=[];
+let allFiles=[], songs=[], queue=[], lyrics=[];
+let index=0;
 const audio=document.getElementById("audio");
 
-/* ================= AUTH ================= */
+/* AUTH */
 window.onload=()=>{
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
@@ -146,23 +228,26 @@ window.onload=()=>{
     callback: t => { token=t.access_token; loadFiles(); }
   });
 };
-function login(){ tokenClient.requestAccessToken({prompt:"select_account"}); }
 
-/* ================= DRIVE ================= */
+function login(){
+  tokenClient.requestAccessToken({prompt:"select_account"});
+}
+
+/* DRIVE */
 function loadFiles(){
   fetch(`https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}' in parents&fields=files(id,name)`,
-    {headers:{Authorization:"Bearer "+token}})
+  {headers:{Authorization:"Bearer "+token}})
   .then(r=>r.json())
   .then(d=>{
     allFiles=d.files;
-    songs=allFiles.filter(f=>f.name.match(/\.(mp3|wav|m4a)$/i));
+    songs=allFiles.filter(f=>/\.(mp3|wav|m4a)$/i.test(f.name));
     queue=[...songs];
     render();
     show("player");
   });
 }
 
-/* ================= UI ================= */
+/* UI */
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -182,10 +267,11 @@ function render(){
 function search(q){
   q=q.toLowerCase();
   queue=songs.filter(s=>s.name.toLowerCase().includes(q));
-  index=0; render();
+  index=0;
+  render();
 }
 
-/* ================= PLAYER ================= */
+/* PLAYER */
 function play(i){
   index=i;
   const s=queue[i];
@@ -199,6 +285,7 @@ function play(i){
   .then(b=>{
     audio.src=URL.createObjectURL(b);
     audio.play();
+    playBtn.innerText="⏸";
   });
 
   loadLyrics(s.name);
@@ -207,9 +294,15 @@ function play(i){
 }
 
 function toggle(){
-  if(audio.paused){ audio.play(); playBtn.innerText="⏸"; }
-  else{ audio.pause(); playBtn.innerText="▶"; }
+  if(audio.paused){
+    audio.play();
+    playBtn.innerText="⏸";
+  }else{
+    audio.pause();
+    playBtn.innerText="▶";
+  }
 }
+
 function next(){ if(index<queue.length-1) play(index+1); }
 function prev(){ if(index>0) play(index-1); }
 
@@ -217,16 +310,19 @@ audio.ontimeupdate=()=>{
   seek.value=(audio.currentTime/audio.duration)*100||0;
   syncLyrics();
 };
+
 seek.oninput=()=>audio.currentTime=(seek.value/100)*audio.duration;
 
-/* Prevent auto-resume on tab switch */
+/* STOP AUTO RESUME */
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden) audio.pause();
 });
 
-/* ================= LYRICS ================= */
+/* LYRICS */
 function loadLyrics(song){
-  lyrics=[]; lyricsBox.innerText="Loading lyrics…";
+  lyrics=[];
+  lyricsBox.innerText="Loading lyrics…";
+
   const base=song.replace(/\.\w+$/,"").toLowerCase().replace(/[^a-z0-9]/g,"");
 
   const lrc=allFiles.find(f=>{
@@ -238,7 +334,7 @@ function loadLyrics(song){
   if(!lrc){ lyricsBox.innerText="No lyrics available"; return; }
 
   fetch(`https://www.googleapis.com/drive/v3/files/${lrc.id}?alt=media`,
-    {headers:{Authorization:"Bearer "+token,Accept:"text/plain"}})
+    {headers:{Authorization:"Bearer "+token}})
   .then(r=>r.text())
   .then(t=>{
     lyrics=[];
@@ -246,8 +342,9 @@ function loadLyrics(song){
     t.split("\n").forEach(l=>{
       const m=l.match(/\[(\d+):(\d+\.?\d*)\](.*)/);
       if(!m) return;
-      lyrics.push({t:+m[1]*60+ +m[2], text:m[3]});
+      lyrics.push({t:+m[1]*60 + +m[2], text:m[3]});
     });
+
     lyrics.forEach(l=>{
       const d=document.createElement("div");
       d.className="lyric-line";
@@ -259,18 +356,27 @@ function loadLyrics(song){
 
 function syncLyrics(){
   if(!lyrics.length) return;
-  let i=lyrics.findIndex((l,idx)=> audio.currentTime < l.t && idx>0)-1;
-  if(i<0) i=lyrics.length-1;
-  document.querySelectorAll(".lyric-line").forEach((d,idx)=>{
-    d.classList.toggle("active",idx===i);
-    if(idx===i) lyricsBox.scrollTop=d.offsetTop-lyricsBox.clientHeight/2;
+  let active=0;
+  lyrics.forEach((l,i)=>{
+    if(audio.currentTime>=l.t) active=i;
   });
+
+  const lines=document.querySelectorAll(".lyric-line");
+  lines.forEach((d,i)=>d.classList.toggle("active",i===active));
+
+  const line=lines[active];
+  if(line){
+    lyricsBox.scrollTo({
+      top:line.offsetTop-lyricsBox.clientHeight/2+line.clientHeight/2,
+      behavior:"smooth"
+    });
+  }
 }
 
-/* ================= COVER ================= */
+/* COVER */
 function loadCover(song){
   const base=song.replace(/\.\w+$/,"");
-  const img=allFiles.find(f=>f.name.startsWith(base)&&f.name.match(/\.(jpg|png)$/i));
+  const img=allFiles.find(f=>f.name.startsWith(base)&&/\.(jpg|png)$/i.test(f.name));
   if(!img){ cover.style.backgroundImage=""; return; }
 
   fetch(`https://www.googleapis.com/drive/v3/files/${img.id}?alt=media`,
@@ -279,5 +385,6 @@ function loadCover(song){
   .then(b=>cover.style.backgroundImage=`url(${URL.createObjectURL(b)})`);
 }
 </script>
+
 </body>
 </html>
