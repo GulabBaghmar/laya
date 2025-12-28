@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Laya</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Segoe UI,sans-serif;
+  background:radial-gradient(circle at top,#b30000,#2b0000);
+  color:white;
+  overflow:hidden;
+}
+.screen{display:none;height:100vh;align-items:center;justify-content:center}
+.screen.active{display:flex}
+
+/* Loading */
+#loading{flex-direction:column}
+.lava{width:260px;height:10px;background:linear-gradient(90deg,orange,red);
+animation:lava 2s infinite}
+@keyframes lava{from{width:0}to{width:260px}}
+
+/* Login */
+.login-box{width:360px;text-align:center}
+.logo{font-size:42px;margin-bottom:30px}
+.input{width:100%;padding:15px;border-radius:30px;border:none;
+margin-bottom:18px;background:linear-gradient(90deg,#ff9a00,#ff4500);color:white}
+.login-btn{width:100%;padding:15px;border-radius:30px;border:none;
+font-size:18px;background:linear-gradient(90deg,#ff4500,#b30000);color:white;cursor:pointer}
+
+/* Layout */
+.layout{display:flex;width:100%;height:100%}
+.player{flex:1;text-align:center;padding:20px}
+.playlist{width:260px;background:rgba(0,0,0,.4);overflow-y:auto}
+
+/* Search */
+.search{width:90%;padding:10px;margin:10px;border-radius:20px;border:none}
+
+/* Cover */
+.cover{
+  width:240px;height:240px;border-radius:25px;
+  background:radial-gradient(circle,orange,darkred);
+  box-shadow:0 0 40px orange;
+  margin:auto;background-size:cover;background-position:center
+}
+
+/* Controls */
+.controls button{
+  font-size:28px;background:none;border:none;
+  color:orange;cursor:pointer;margin:10px
+}
+#seek{width:80%}
+
+/* Playlist items */
+.song{padding:10px;cursor:pointer}
+.song.active{background:linear-gradient(90deg,orange,red)}
+
+/* Lyrics */
+.lyrics-box{
+  height:180px;margin-top:10px;overflow-y:auto;
+  background:rgba(0,0,0,.35);border-radius:12px;
+  padding:10px;font-size:14px;text-align:center
+}
+.lyric-line{opacity:.3;padding:5px}
+.lyric-line.active{opacity:1;color:orange;font-weight:bold;font-size:18px}
+
+/* Mini player */
+.mini{
+  position:fixed;bottom:0;left:0;right:0;height:60px;
+  background:#111;display:none;align-items:center;
+  justify-content:space-between;padding:0 15px;
+}
+.mini button{background:none;border:none;color:orange;font-size:22px}
+
+@media(max-width:700px){
+  .layout{flex-direction:column}
+  .playlist{width:100%;height:200px}
+}
+</style>
+</head>
+
+<body>
+
+<div id="loading" class="screen active">
+  <h1>🔥 Laya</h1>
+  <div class="lava"></div>
+</div>
+
+<div id="login" class="screen">
+  <div class="login-box">
+    <div class="logo">🔥 Laya</div>
+    <input class="input" placeholder="Email (future update)" disabled>
+    <input class="input" placeholder="Password (future update)" disabled>
+    <button class="login-btn" onclick="login()">LOG IN WITH GOOGLE</button>
+  </div>
+</div>
+
+<div id="player" class="screen">
+  <div class="layout">
+
+    <div class="player">
+      <div class="cover" id="cover"></div>
+      <h2 id="title">Select a song</h2>
+
+      <audio id="audio"></audio>
+      <input type="range" id="seek" value="0">
+
+      <div class="controls">
+        <button onclick="prev()">⏮</button>
+        <button onclick="toggle()" id="playBtn">▶</button>
+        <button onclick="next()">⏭</button>
+      </div>
+
+      <div class="lyrics-box" id="lyricsBox">Lyrics here</div>
+    </div>
+
+    <div class="playlist">
+      <input class="search" placeholder="Search…" oninput="search(this.value)">
+      <div id="list"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="mini" id="mini">
+  <span id="miniTitle">Song</span>
+  <div>
+    <button onclick="toggle()">▶</button>
+    <button onclick="next()">⏭</button>
+  </div>
+</div>
+
+<script>
+const CLIENT_ID="356912146612-r09rmnims2tb3vi0gd7sietp33dnjnuj.apps.googleusercontent.com";
+const FOLDER_ID="1mv4L8IDoDEWnWqE7jaAatoAR9y4BsePR";
+
+let tokenClient,token;
+let allFiles=[],songs=[],queue=[],cache={};
+let index=0;
+const audio=document.getElementById("audio");
+
+const show=id=>{
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+};
+
+setTimeout(()=>show("login"),1500);
+
+window.onload=()=>{
+  tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:CLIENT_ID,
+    scope:"https://www.googleapis.com/auth/drive.readonly",
+    callback:r=>{token=r.access_token;loadFiles();}
+  });
+};
+
+function login(){
+  tokenClient.requestAccessToken({prompt:"select_account"});
+}
+
+function loadFiles(){
+  fetch(`https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}' in parents&fields=files(id,name)`,
+    {headers:{Authorization:"Bearer "+token}})
+  .then(r=>r.json())
+  .then(d=>{
+    allFiles=d.files;
+    songs=allFiles.filter(f=>f.name.match(/\.(mp3|wav|m4a)$/i));
+    queue=[...songs];
+    render();
+    show("player");
+  });
+}
+
+function render(){
+  list.innerHTML="";
+  queue.forEach((s,i)=>{
+    const d=document.createElement("div");
+    d.className="song"+(i===index?" active":"");
+    d.innerText=s.name;
+    d.onclick=()=>play(i);
+    list.appendChild(d);
+  });
+}
+
+function search(q){
+  q=q.toLowerCase();
+  queue=songs.filter(s=>s.name.toLowerCase().includes(q));
+  index=0;
+  render();
+}
+
+function play(i){
+  index=i;
+  const s=queue[i];
+  title.innerText=s.name;
+  miniTitle.innerText=s.name;
+  mini.style.display="flex";
+
+  if(cache[s.id]){
+    audio.src=cache[s.id];
+    audio.play();
+  }else{
+    fetch(`https://www.googleapis.com/drive/v3/files/${s.id}?alt=media`,
+      {headers:{Authorization:"Bearer "+token}})
+    .then(r=>r.blob())
+    .then(b=>{
+      const url=URL.createObjectURL(b);
+      cache[s.id]=url;
+      audio.src=url;
+      audio.play();
+    });
+  }
+  loadCover(s.name);
+  loadLyrics(s.name);
+  render();
+}
+
+function toggle(){
+  if(audio.paused){audio.play();playBtn.innerText="⏸";}
+  else{audio.pause();playBtn.innerText="▶";}
+}
+
+function next(){if(index<queue.length-1)play(index+1);}
+function prev(){if(index>0)play(index-1);}
+
+audio.ontimeupdate=()=>seek.value=(audio.currentTime/audio.duration)*100||0;
+seek.oninput=()=>audio.currentTime=(seek.value/100)*audio.duration;
+
+/* Lyrics */
+function loadLyrics(name){
+  lyricsBox.innerText="Loading lyrics…";
+  const base=name.replace(/\.\w+$/,"").toLowerCase().replace(/[^a-z0-9]/g,"");
+  const lrc=allFiles.find(f=>f.name.endsWith(".lrc") &&
+    base.includes(f.name.replace(".lrc","").toLowerCase().replace(/[^a-z0-9]/g,"")));
+  if(!lrc){lyricsBox.innerText="No lyrics";return;}
+  fetch(`https://www.googleapis.com/drive/v3/files/${lrc.id}?alt=media`,
+    {headers:{Authorization:"Bearer "+token,Accept:"text/plain"}})
+  .then(r=>r.text())
+  .then(t=>{
+    lyricsBox.innerHTML="";
+    t.split("\n").forEach(l=>{
+      const m=l.match(/\[(\d+):(\d+)\](.*)/);
+      if(!m)return;
+      const d=document.createElement("div");
+      d.className="lyric-line";
+      d.innerText=m[3];
+      lyricsBox.appendChild(d);
+    });
+  });
+}
+
+/* Cover */
+function loadCover(name){
+  const base=name.replace(/\.\w+$/,"");
+  const img=allFiles.find(f=>f.name.startsWith(base)&&f.name.match(/\.(jpg|png)$/i));
+  if(!img){cover.style.backgroundImage="";return;}
+  fetch(`https://www.googleapis.com/drive/v3/files/${img.id}?alt=media`,
+    {headers:{Authorization:"Bearer "+token}})
+  .then(r=>r.blob())
+  .then(b=>cover.style.backgroundImage=`url(${URL.createObjectURL(b)})`);
+}
+</script>
+
+</body>
+</html>
