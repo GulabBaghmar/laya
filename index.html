@@ -16,101 +16,56 @@ body{
   overflow:hidden;
 }
 
+/* Screens */
 .screen{display:none;height:100vh}
 .screen.active{display:flex}
 
-#login{
-  align-items:center;
-  justify-content:center;
-}
-
-.login-box{
-  width:320px;
-  text-align:center;
-}
-
-.logo{
-  font-size:42px;
-  margin-bottom:25px;
-}
-
+/* Login */
+#login{align-items:center;justify-content:center}
+.login-box{width:320px;text-align:center}
+.logo{font-size:42px;margin-bottom:25px}
 .btn{
-  width:100%;
-  padding:15px;
-  border:none;
-  border-radius:30px;
+  width:100%;padding:15px;border:none;border-radius:30px;
   background:linear-gradient(90deg,#ff9a00,#ff4500);
-  color:white;
-  font-size:18px;
-  cursor:pointer;
+  color:#fff;font-size:18px;cursor:pointer;
 }
 
-.layout{
-  display:flex;
-  width:100%;
-  height:100%;
-}
+/* Layout */
+.layout{display:flex;width:100%;height:100%}
+.player{flex:1;padding:16px;text-align:center}
+.playlist{width:260px;background:rgba(0,0,0,.45);overflow-y:auto}
 
-.player{
-  flex:1;
-  padding:16px;
-  text-align:center;
-}
-
-.playlist{
-  width:260px;
-  background:rgba(0,0,0,.45);
-  overflow-y:auto;
-}
-
+/* Cover */
 .cover{
-  width:220px;
-  height:220px;
-  margin:auto;
-  border-radius:22px;
+  width:220px;height:220px;margin:auto;border-radius:22px;
   background:radial-gradient(circle,orange,darkred);
   box-shadow:0 0 30px orange;
-  background-size:cover;
-  background-position:center;
+  background-size:cover;background-position:center;
 }
 
+/* Controls */
 .controls button{
-  background:none;
-  border:none;
-  color:orange;
-  font-size:26px;
-  margin:8px;
-  cursor:pointer;
+  background:none;border:none;color:orange;
+  font-size:26px;margin:8px;cursor:pointer
 }
+#seek{width:90%}
 
-#seek{
-  width:90%;
-}
-
+/* Playlist */
 .search{
-  width:90%;
-  padding:8px;
-  margin:8px;
-  border-radius:20px;
-  border:none;
+  width:90%;padding:8px;margin:8px;
+  border-radius:20px;border:none
 }
+.song{padding:10px;cursor:pointer}
+.song.active{background:linear-gradient(90deg,orange,red)}
 
-.song{
-  padding:10px;
-  cursor:pointer;
-}
-
-.song.active{
-  background:linear-gradient(90deg,orange,red);
-}
-
+/* Lyrics */
 .lyrics-box{
-  height:220px;
+  height:260px;
   margin-top:12px;
   overflow-y:auto;
   background:rgba(0,0,0,.45);
   border-radius:12px;
-  padding:10px;
+  padding:80px 10px;   /* 🔥 BUFFER = FIX */
 }
 
 .lyric-line{
@@ -135,31 +90,23 @@ body{
   box-shadow:0 0 12px rgba(255,120,0,.6);
 }
 
+/* Mini Player */
 .mini{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  height:60px;
-  background:#111;
-  display:none;
-  align-items:center;
+  position:fixed;bottom:0;left:0;right:0;
+  height:60px;background:#111;
+  display:none;align-items:center;
   justify-content:space-between;
   padding:0 15px;
 }
-
 .mini button{
-  background:none;
-  border:none;
-  color:orange;
-  font-size:22px;
+  background:none;border:none;
+  color:orange;font-size:22px
 }
 
-/* MOBILE FIX */
+/* Mobile */
 @media(max-width:768px){
   .layout{flex-direction:column}
   .playlist{width:100%;height:160px}
-  .lyrics-box{height:260px}
 }
 </style>
 </head>
@@ -191,7 +138,9 @@ body{
         <button onclick="next()">⏭</button>
       </div>
 
-      <div class="lyrics-box" id="lyricsBox">Lyrics will appear here</div>
+      <div class="lyrics-box" id="lyricsBox">
+        Lyrics will appear here
+      </div>
     </div>
 
     <div class="playlist">
@@ -313,7 +262,7 @@ audio.ontimeupdate=()=>{
 
 seek.oninput=()=>audio.currentTime=(seek.value/100)*audio.duration;
 
-/* STOP AUTO RESUME */
+/* STOP AUTO-RESUME */
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden) audio.pause();
 });
@@ -323,15 +272,20 @@ function loadLyrics(song){
   lyrics=[];
   lyricsBox.innerText="Loading lyrics…";
 
-  const base=song.replace(/\.\w+$/,"").toLowerCase().replace(/[^a-z0-9]/g,"");
+  const base=song.replace(/\.\w+$/,"")
+    .toLowerCase().replace(/[^a-z0-9]/g,"");
 
   const lrc=allFiles.find(f=>{
     if(!f.name.toLowerCase().endsWith(".lrc")) return false;
-    const b=f.name.replace(".lrc","").toLowerCase().replace(/[^a-z0-9]/g,"");
+    const b=f.name.replace(".lrc","")
+      .toLowerCase().replace(/[^a-z0-9]/g,"");
     return b.includes(base)||base.includes(b);
   });
 
-  if(!lrc){ lyricsBox.innerText="No lyrics available"; return; }
+  if(!lrc){
+    lyricsBox.innerText="No lyrics available";
+    return;
+  }
 
   fetch(`https://www.googleapis.com/drive/v3/files/${lrc.id}?alt=media`,
     {headers:{Authorization:"Bearer "+token}})
@@ -356,6 +310,7 @@ function loadLyrics(song){
 
 function syncLyrics(){
   if(!lyrics.length) return;
+
   let active=0;
   lyrics.forEach((l,i)=>{
     if(audio.currentTime>=l.t) active=i;
@@ -365,18 +320,22 @@ function syncLyrics(){
   lines.forEach((d,i)=>d.classList.toggle("active",i===active));
 
   const line=lines[active];
-  if(line){
-    lyricsBox.scrollTo({
-      top:line.offsetTop-lyricsBox.clientHeight/2+line.clientHeight/2,
-      behavior:"smooth"
-    });
-  }
+  if(!line) return;
+
+  const target =
+    line.offsetTop -
+    lyricsBox.clientHeight/2 +
+    line.clientHeight/2;
+
+  lyricsBox.scrollTop=Math.max(0,target);
 }
 
 /* COVER */
 function loadCover(song){
   const base=song.replace(/\.\w+$/,"");
-  const img=allFiles.find(f=>f.name.startsWith(base)&&/\.(jpg|png)$/i.test(f.name));
+  const img=allFiles.find(f=>
+    f.name.startsWith(base)&&/\.(jpg|png)$/i.test(f.name)
+  );
   if(!img){ cover.style.backgroundImage=""; return; }
 
   fetch(`https://www.googleapis.com/drive/v3/files/${img.id}?alt=media`,
@@ -385,6 +344,6 @@ function loadCover(song){
   .then(b=>cover.style.backgroundImage=`url(${URL.createObjectURL(b)})`);
 }
 </script>
-
 </body>
-</html>
+  </html>
+  
